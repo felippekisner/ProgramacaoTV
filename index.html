@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Programação</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #b55506;
+      color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 40px;
+      box-sizing: border-box;
+    }
+
+    .conteudo-container {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+
+    .slide {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: flex-start;
+      max-width: 80%;
+    }
+
+    .slide.active {
+      display: flex;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+
+    .conteudo {
+      font-size: 1.8em;
+      line-height: 1.6;
+    }
+
+    .logo {
+      width: 200px;
+      height: auto;
+      object-fit: contain;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Conteúdo à esquerda -->
+  <div class="conteudo-container">
+    <div class="slide" id="dia">
+      <h1>Programação do Dia</h1>
+      <div class="conteudo" id="conteudo-dia">Carregando...</div>
+    </div>
+
+    <div class="slide" id="semana">
+      <h1>Programação da Semana</h1>
+      <div class="conteudo" id="conteudo-semana">Carregando...</div>
+    </div>
+
+    <div class="slide" id="mes">
+      <h1>Programação do Mês</h1>
+      <div class="conteudo" id="conteudo-mes">Carregando...</div>
+    </div>
+  </div>
+
+  <!-- Logo à direita -->
+  <img src="logo.png" alt="Logo" class="logo">
+
+  <script>
+    const agenda = {
+      "15/05": "",
+      "16/05": "OBA Matutino: 9h30 Vespertino: 13h30",
+      "17/05": "Atividade de Educação Física especial no ginásio",
+      "18/05": "Prova de Matemática às 9h",
+      "19/05": "Formação prof. 6º ao 9º – Jardim Botânico – 7h30",
+      "20/05": "Observatório Mirim – 4º B",
+      "21/05": "Seletiva – Cat 1: 9h45 | Cat 3: 14h",
+      "22/05": "Observatório Mirim – 4º B | Seletiva – Cat 2: 8h, Cat 4: 14h",
+      "23/05": "Formação prof. 6º ao 9º – Jardim Botânico – 7h30",
+      "28/05": "Homenagem em Cívica – 9º B, 4º A"
+    };
+
+    const slides = ["dia", "semana", "mes"];
+    let current = 0;
+
+    function mostrarSlide(index) {
+      slides.forEach((id, i) => {
+        document.getElementById(id).classList.toggle("active", i === index);
+      });
+    }
+
+    function atualizarDia() {
+      const hoje = new Date();
+      const dia = hoje.getDate().toString().padStart(2, '0');
+      const mes = (hoje.getMonth() + 1).toString().padStart(2, '0');
+      const dataChave = `${dia}/${mes}`;
+      const conteudo = agenda[dataChave] || "Nenhuma programação especial para hoje.";
+      document.getElementById("conteudo-dia").innerText = conteudo;
+    }
+
+    function atualizarSemana() {
+      const hoje = new Date();
+      const diaSemana = hoje.getDay();
+      const diffSegunda = hoje.getDate() - diaSemana + (diaSemana === 0 ? -6 : 1);
+      const inicioSemana = new Date(hoje.setDate(diffSegunda));
+      const diasSemana = [];
+
+      for (let i = 0; i < 7; i++) {
+        const data = new Date(inicioSemana);
+        data.setDate(inicioSemana.getDate() + i);
+        const dia = data.getDate().toString().padStart(2, '0');
+        const mes = (data.getMonth() + 1).toString().padStart(2, '0');
+        const dataFormatada = `${dia}/${mes}`;
+        const diaDaSemana = data.toLocaleDateString('pt-BR', { weekday: 'long' });
+
+        if (agenda[dataFormatada]) {
+          diasSemana.push(`<strong>${diaDaSemana}</strong> (${dataFormatada}): ${agenda[dataFormatada]}`);
+        }
+      }
+
+      const conteudoSemana = diasSemana.length > 0 ? diasSemana.join('<br>') : "Nenhuma programação especial nesta semana.";
+      document.getElementById("conteudo-semana").innerHTML = conteudoSemana;
+    }
+
+    function atualizarMes() {
+      const hoje = new Date();
+      const mesAtual = (hoje.getMonth() + 1).toString().padStart(2, '0');
+      const eventosMes = [];
+
+      for (const data in agenda) {
+        if (data.endsWith(`/${mesAtual}`)) {
+          eventosMes.push(`<strong>${data}</strong>: ${agenda[data]}`);
+        }
+      }
+
+      const conteudoMes = eventosMes.length > 0 ? eventosMes.join('<br>') : "Nenhuma programação especial neste mês.";
+      document.getElementById("conteudo-mes").innerHTML = conteudoMes;
+    }
+
+    function iniciarCiclo() {
+      mostrarSlide(current);
+      setInterval(() => {
+        current = (current + 1) % slides.length;
+        mostrarSlide(current);
+      }, 60000); // troca a cada 60 segundos
+    }
+
+    atualizarDia();
+    atualizarSemana();
+    atualizarMes();
+    iniciarCiclo();
+  </script>
+
+</body>
+</html>
